@@ -1,0 +1,15 @@
+{
+    "name": "monsieurbiz/lnscale",
+    "type": "project",
+    "license": "mit",
+    "minimum-stability": "dev",
+    "require": {
+        "symfony/console": "^3.2",
+        "symfony/process": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "MonsieurBiz\\": "src/"
+        }
+    }
+}
