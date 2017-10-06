@@ -1,5 +1,7 @@
 # `lnscale`, the tool to scale your symlinks
 
+![lnscale sample](./lnscale.png)
+
 ## Install
 
 Download the last `lnscale.phar` available in [releases](https://github.com/monsieurbiz/lnscale/releases).
