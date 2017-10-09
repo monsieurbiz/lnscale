@@ -1,4 +1,9 @@
 <?php
+/**
+ * @license See LICENSE file
+ * @author Jacques Bodin-Hullin <j.bodinhullin@monsieurbiz.com> <@jacquesbh>
+ * @copyright Copyright (c) 2017 Monsieur Biz (https://monsieurbiz.com/)
+ */
 
 namespace MonsieurBiz;
 
@@ -18,7 +23,7 @@ class ScaleCommand extends Command
         $this
             ->setName('scale')
             ->setDescription('Scale symlinks')
-            ->addArgument('symlink', InputArgument::REQUIRED, 'Symlink to scale. Should be a symlink already.')
+            ->addArgument('service', InputArgument::REQUIRED, 'Service to scale. Should be a real directory.')
             ->addArgument('scale', InputArgument::REQUIRED, 'Number of symlinks. Should be an integer >= 0.')
         ;
     }
@@ -33,60 +38,98 @@ class ScaleCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $symlink = $input->getArgument('symlink');
+        $service = $input->getArgument('service');
         $scale = (int) $input->getArgument('scale');
 
-        if (!is_link($symlink)) {
-            $output->writeln('<error>The symlink argument should be a symlink on the system.</error>');
+        if (!is_dir($service) || is_link($service)) {
+            $output->writeln('<error>The service argument should be a real directory on the system.</error>');
             return 1;
         }
 
         if ($scale <= 0) {
-            $output->writeln('<error>The scale argument should be greater than 0.</error>');
-            $output->writeln('<info>If you want to remove the first symlink, do it manually.</info>');
+            $output->writeln('<error>The scale argument should be greater or equal than 0.</error>');
             return 1;
         }
 
         $output->writeln(sprintf('<info>Scaling to %d…</info>', $scale));
 
         // Get info
-        $info = pathinfo($symlink);
-        $link = realpath($symlink);
-
-        // If the symlink is already a scale one, we get the name part
-        $regexOfScaleLink = '`^(?P<name>[0-9a-z_]+)__(?P<number>[0-9]+)$`i';
-        if (preg_match($regexOfScaleLink, $info['basename'], $matches)) {
-            $info['basename'] = $matches['name'];
-        }
-
-//        // Change directory into the one of the symlink
-//        $dir = realpath($info['dirname']);
-//        chdir($dir);
+        $realService = realpath($service);
+        $info = pathinfo($service);
 
         // Grow up
+        $mainDir = getcwd();
         for ($number = 1; $number <= $scale; $number++) {
-            $name = ($number === 1) ? $info['basename'] : sprintf('%s__%d', $info['basename'], $number);
-            if (!is_link('./' . $name)) {
-                symlink($link, $name);
+            chdir($mainDir);
+
+            // First dir
+            if ($number === 1 && is_dir('./' . $info['basename'])) {
+                continue;
+            }
+
+            $name = sprintf('%s___%d', $info['basename'], $number);
+            if (!is_dir('./' . $name)) {
+                mkdir('./' . $name);
+                chdir($mainDir . '/' . $name);
+
+                // Main run
+                if (is_file($realService . '/run')) {
+                    symlink($realService . '/run', './run');
+                }
+
+                // Logs
+                if (is_dir($realService . '/log') && is_file($realService . '/log/run')) {
+                    mkdir($mainDir . '/' . $name . '/log');
+                    symlink($realService . '/log/run', './log/run');
+                }
+
                 $output->writeln(sprintf('<comment>Scale %d -> %s</comment>', $number, $name));
             }
         }
+        chdir($mainDir);
 
         // Decline
-        $files = glob(sprintf('./%s__*', $info['basename']));
-        foreach ($files as $file) {
-            if (is_link($file)) {
-                $fileInfo = pathinfo($file);
-                if (preg_match($regexOfScaleLink, $fileInfo['basename'], $matches)) {
+        $regexOfScaleDirectory = '`^(?P<name>[0-9a-z_]+)___(?P<number>[0-9]+)$`i';
+        $dirs = glob(sprintf($mainDir . '/%s___*', $info['basename']));
+        foreach ($dirs as $dir) {
+            if (is_dir($dir)) {
+                $dirInfo = pathinfo(realpath($dir));
+                if (preg_match($regexOfScaleDirectory, $dirInfo['basename'], $matches)) {
                     if ((int) $matches['number'] > $scale) {
-                        unlink($file);
-                        $output->writeln(sprintf('<comment>Remove %s</comment>', $fileInfo['basename']));
+                        $this->_removeDir($output, $dir);
+                        $output->writeln(sprintf('<comment>Remove %s</comment>', $dirInfo['basename']));
                     }
                 }
             }
         }
 
         $output->writeln('<info>Done</info>');
+    }
+
+    /**
+     * Remove directory recursively
+     *
+     * @param $output
+     * @param $dir
+     */
+    protected function _removeDir($output, $dir)
+    {
+        if (is_dir($dir)) {
+            $handle = opendir($dir);
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+                $entry = $dir . '/' . $entry;
+                if (is_file($entry) || is_link($entry)) {
+                    unlink($entry);
+                } else {
+                    $this->_removeDir($output, $entry);
+                }
+            }
+            closedir($handle);
+            rmdir($dir);
+        }
     }
 
 }
