@@ -89,7 +89,7 @@ class ScaleCommand extends Command
         chdir($mainDir);
 
         // Decline
-        $regexOfScaleDirectory = '`^(?P<name>[0-9a-z_]+)___(?P<number>[0-9]+)$`i';
+        $regexOfScaleDirectory = '`^(?P<name>[0-9a-z_.-]+)___(?P<number>[0-9]+)$`i';
         $dirs = glob(sprintf($mainDir . '/%s___*', $info['basename']));
         foreach ($dirs as $dir) {
             if (is_dir($dir)) {
