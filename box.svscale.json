@@ -1,5 +1,5 @@
 {
-  "alias": "lnscale",
+  "alias": "svscale",
   "chmod": "0755",
   "directories": [
     "src"
@@ -13,7 +13,7 @@
     }
   ],
   "git-version": "package_version",
-  "main": "bin/lnscale",
-  "output": "builds/lnscale.phar",
+  "main": "bin/svscale",
+  "output": "builds/svscale.phar",
   "stub": true
 }

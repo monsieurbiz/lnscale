@@ -6,7 +6,7 @@ require __DIR__ . '/../vendor/autoload.php';
 use Symfony\Component\Console\Application;
 use MonsieurBiz\ScaleCommand;
 
-$app = new Application('lnscale', '0.1.0');
+$app = new Application('svscale', '0.2.0');
 $app->add(new ScaleCommand());
 $app->setDefaultCommand('scale', true);
 $app->run();

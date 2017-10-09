@@ -1,18 +1,18 @@
-# `lnscale`, the tool to scale your symlinks
+# `svscale`, the tool to scale your runit services
 
-![lnscale sample](./lnscale.png)
+![lnscale sample](./svscale.png)
 
 ## Install
 
-Download the last `lnscale.phar` available in [releases](https://github.com/monsieurbiz/lnscale/releases).
+Download the last `svscale.phar` available in [releases](https://github.com/monsieurbiz/svscale/releases).
 
-Then rename it if you want to `lnscale`. Put it in your `~/bin/` directory or somewhere else in your `$PATH`.
+Then rename it if you want to `svscale`. Put it in your `~/bin/` directory or somewhere else in your `$PATH`.
 
-And finally turn on the execution flag (`chmod +x lnscale`).
+And finally turn on the execution flag (`chmod +x svscale`).
 
 ## How to use it
 
-Get the help by running `lnscale`, `lnscale -h` or `lnscale --help`.
+Get the help by running `svscale`, `svscale -h` or `svscale --help`.
 
 ## License
 
