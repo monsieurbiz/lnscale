@@ -81,6 +81,9 @@ class ScaleCommand extends Command
                 if (is_dir($realService . '/log') && is_file($realService . '/log/run')) {
                     mkdir($mainDir . '/' . $name . '/log');
                     symlink($realService . '/log/run', './log/run');
+                    if (is_file($realService . '/log/config')) {
+                        symlink($realService . '/log/config', './log/config');
+                    }
                 }
 
                 $output->writeln(sprintf('<comment>Scale %d -> %s</comment>', $number, $name));
